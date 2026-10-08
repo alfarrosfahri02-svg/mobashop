@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MobaShop - Top Up Game</title>
+<link rel="icon" href="img/akhir.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700;800&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
+<style>
+/* =========================================
+   RESET & BASE
+   ========================================= */
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Raleway',sans-serif;background:#0a0a0f;color:#e2e8f0;overflow-x:hidden}
+
+/* =========================================
+   ANIMASI UX
+   ========================================= */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulseGlow {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(129, 140, 248, 0.6); }
+  50% { transform: scale(1.05); box-shadow: 0 0 0 12px rgba(129, 140, 248, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(129, 140, 248, 0); }
+}
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}
+@keyframes pulseText {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+@keyframes gradientText {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Loading Overlay */
+.loading-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(10, 10, 15, 0.95); z-index: 3000;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+  backdrop-filter: blur(5px);
+}
+.loading-overlay.show {
+  opacity: 1; pointer-events: auto;
+}
+.spinner {
+  width: 60px; height: 60px;
+  border: 5px solid rgba(192, 132, 252, 0.2);
+  border-top-color: #c084fc; border-radius: 50%;
+  animation: spin 1s linear infinite; margin-bottom: 24px;
+}
+.loading-text {
+  font-family: 'Oswald', sans-serif; font-size: 24px; font-weight: 700;
+  color: #e2e8f0; letter-spacing: 1px; animation: pulseText 1.5s infinite;
+}
+
+/* =========================================
+   OVERLAY PAGES (Pembayaran & Struk)
+   ========================================= */
+.page.overlay-style {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100vh;
+  background: rgba(10, 10, 15, 0.98);
+  z-index: 2500; /* Di atas segalanya termasuk navbar */
+  overflow-y: auto;
+  padding: 60px 24px;
+  backdrop-filter: blur(10px);
+}
+.overlay-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 24px;
+  padding: 40px;
+}
+
+/* =========================================
+   PARALLAX SECTIONS
+   ========================================= */
+.parallax-window{
+  min-height:100vh; background-attachment:fixed; background-size:cover;
+  background-position:center; position:relative;
+}
+#intro{background-image:linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.55)),url('img/homepage.png')}
+#menu-section{background-image:linear-gradient(rgba(10,10,15,.82),rgba(10,10,15,.82)),url('img/homee.gif')}
+#policy{background-image:linear-gradient(rgba(10,10,15,.9),rgba(10,10,15,.9)),url('img/policy.png')}
+#about{background-image:linear-gradient(rgba(10,10,15,.75),rgba(10,10,15,.75)),url('img/about.png')}
+#contact{background-image:linear-gradient(rgba(10,10,15,.80),rgba(10,10,15,.80)),url('img/akhir.png')}
+
+/* =========================================
+   NAVIGATION
+   ========================================= */
+#tm-nav{
+  position:fixed;top:0;left:0;width:100%;z-index:1000;
+  transition:background .3s,padding .3s; padding:10px 0;
+}
+#tm-nav.scrolled{background:rgba(10,10,15,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(99,102,241,.2)}
+.nav-container{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-family:'Oswald',sans-serif;font-size:26px;font-weight:700;background:linear-gradient(90deg,#818cf8,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none;cursor:pointer}
+.nav-links{display:flex;gap:8px;list-style:none}
+.nav-links a{color:#c084fc;text-decoration:none;font-weight:500;font-size:15px;padding:8px 16px;border-radius:8px;transition:all .2s}
+.nav-links a:hover{background:rgba(99,102,241,.15);color:#fff}
+.menu-toggle{display:none;background:none;border:none;cursor:pointer;padding:6px}
+.menu-toggle span{display:block;width:24px;height:2px;background:#c084fc;margin:5px 0;transition:.3s;border-radius:2px}
+
+/* =========================================
+   INTRO SECTION
+   ========================================= */
+#intro{display:flex;align-items:center;justify-content:center;min-height:100vh}
+.intro-inner{max-width:700px;width:100%;margin:0 auto;padding:120px 24px 60px;text-align:center}
+.intro-badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:1.5px;padding:4px 14px;border-radius:20px;text-transform:uppercase;background:rgba(99,102,241,.15);color:#818cf8;border:1px solid rgba(99,102,241,.35);margin-bottom:18px}
+.intro-logo {
+  font-family: 'Oswald', sans-serif;
+  font-size: 72px;
+  font-weight: 700;
+  line-height: 1;
+  background: linear-gradient(270deg, #ff3366, #ff9933, #33cc99, #3399ff, #9933ff, #ff3366);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 12px;
+  animation: gradientText 6s ease infinite;
+}
+.intro-tagline{color:#94a3b8;font-size:18px;font-weight:400;letter-spacing:2px;margin-bottom:32px;text-transform:uppercase}
+.intro-desc-box{background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:24px 32px;margin-bottom:24px;text-align:left}
+.intro-desc-box p{color:#cbd5e1;font-size:15px;line-height:1.8;font-weight:300}
+.intro-desc-box a{color:#818cf8;text-decoration:none}
+.intro-desc-box a:hover{text-decoration:underline}
+.intro-cta{display:inline-flex;align-items:center;gap:12px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;text-decoration:none;padding:16px 36px;border-radius:14px;font-size:17px;font-weight:700;transition:all .2s;border:none;cursor:pointer;font-family:'Raleway',sans-serif}
+.intro-cta:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(99,102,241,.4)}
+.intro-cta svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2}
+
+/* =========================================
+   SECTION COMMON
+   ========================================= */
+.section-wrap{max-width:1100px;margin:0 auto;padding:80px 24px}
+.section-title-wrap{text-align:center;margin-bottom:50px}
+.section-title{font-family:'Oswald',sans-serif;font-size:38px;font-weight:700;letter-spacing:1px;position:relative;display:inline-block;padding:14px 40px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1)}
+.section-title span{background:linear-gradient(90deg,#818cf8,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.section-sub{color:#64748b;font-size:15px;margin-top:12px}
+
+/* =========================================
+   TOPUP PLATFORM — PAGES
+   ========================================= */
+.page{display:none}
+.page.active{display:block; animation: fadeInUp 0.5s ease-out forwards;} 
+.bc{display:flex;align-items:center;gap:6px;font-size:13px;color:#64748b;margin-bottom:22px}
+.bc .lk{color:#818cf8;cursor:pointer;transition:color .15s}
+.bc .lk:hover{color:#c084fc}
+
+/* ---- Game Cards & Packages ---- */
+.games-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px;margin-bottom:32px}
+.game-card{border-radius:18px;padding:0;cursor:pointer;transition:all .22s;position:relative;overflow:hidden;border:1px solid transparent}
+.game-card:hover{transform:translateY(-6px)}
+.gc-top{height:130px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.gc-logo{width:80px;height:80px;border-radius:20px;object-fit:cover;position:relative;z-index:1;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.gc-glow{position:absolute;inset:0;opacity:.35;background:radial-gradient(circle at center,var(--accent) 0%,transparent 70%)}
+.gc-body{padding:16px 18px 18px}
+.gc-cat{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px}
+.gc-name{font-size:16px;font-weight:700;margin-bottom:4px}
+.gc-from{font-size:12px;color:#64748b}
+.gc-arrow{position:absolute;top:14px;right:14px;opacity:.25;font-size:16px;color:#fff}
+.game-header-row{display:flex;align-items:center;gap:16px;margin-bottom:10px}
+.gh-logo{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;box-shadow:0 4px 16px rgba(0,0,0,.4)}
+.pkg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:12px;margin-bottom:28px}
+.pkg-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px;cursor:pointer;transition:all .15s;position:relative}
+.pkg-card:hover{background:rgba(99,102,241,.1);border-color:#818cf8}
+.pkg-card.sel{background:rgba(99,102,241,.16);border-color:#818cf8;box-shadow:0 0 0 1px #818cf8; transform:scale(1.02);} 
+.pkg-card.sel::after{content:'✓';position:absolute;top:10px;right:12px;color:#818cf8;font-weight:700;font-size:14px}
+.pkg-label{font-size:17px;font-weight:700;margin-bottom:2px}
+.pkg-bonus{font-size:11px;color:#818cf8;min-height:16px;margin-bottom:8px}
+.pkg-price{font-size:16px;font-weight:800;color:#c084fc}
+
+/* ---- Form & Alerts ---- */
+.summary-card{background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.22);border-radius:16px;padding:20px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.sum-title{font-size:10px;color:#818cf8;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px}
+.sum-name{font-weight:700;font-size:16px;margin-bottom:2px}
+.sum-sub{font-size:13px;color:#94a3b8}
+.sum-price{font-size:24px;font-weight:800;color:#c084fc;white-space:nowrap}
+.form-inner{max-width:480px}
+.lbl{font-size:13px;color:#94a3b8;margin-bottom:5px;display:block;font-weight:500}
+.inp{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:11px;padding:12px 15px;color:#e2e8f0;font-size:15px;font-family:'Raleway',sans-serif;outline:none;transition:border-color .15s}
+.inp:focus{border-color:#818cf8;background:rgba(99,102,241,.06)}
+.inp-group{margin-bottom:6px}
+.inp-hint{font-size:12px;color:#475569;margin-bottom:16px;padding-left:2px}
+.divider{height:1px;background:rgba(255,255,255,.08);margin:18px 0}
+.err-box{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:11px;padding:11px 15px;color:#f87171;font-size:13px;margin-bottom:16px;display:none}
+.ok-box{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:11px;padding:11px 15px;color:#4ade80;font-size:13px;margin-bottom:16px}
+.info-box{background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.2);border-radius:11px;padding:11px 15px;font-size:13px;color:#818cf8;margin-bottom:18px}
+
+/* ---- Buttons ---- */
+.btn-row{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 24px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;border:none;transition:all .15s;font-family:'Raleway',sans-serif;text-decoration:none;white-space:nowrap}
+.btn-p{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff}
+.btn-p:hover{opacity:.88;transform:translateY(-2px);box-shadow:0 6px 20px rgba(99,102,241,.3)}
+.btn-s{background:rgba(255,255,255,.06);color:#e2e8f0;border:1px solid rgba(255,255,255,.12)}
+.btn-s:hover{background:rgba(255,255,255,.1)}
+.btn-danger{background:rgba(239,68,68,.15);color:#f87171; border:1px solid rgba(239,68,68,.3)}
+.btn-danger:hover{background:rgba(239,68,68,.25)}
+.btn-full{width:100%}
+.btn-lg{padding:14px 28px;font-size:15px;border-radius:14px}
+
+/* ---- Cart System ---- */
+.cart-fab {
+  position: fixed; bottom: 30px; right: 30px;
+  background: linear-gradient(135deg,#6366f1,#8b5cf6);
+  color: #fff; width: 64px; height: 64px;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 26px; box-shadow: 0 10px 25px rgba(99,102,241,0.5);
+  cursor: pointer; z-index: 999; transition: transform 0.2s;
+}
+.cart-fab:hover { transform: scale(1.08); }
+.cart-badge {
+  position: absolute; top: 0; right: 0;
+  background: #ef4444; color: #fff; font-size: 13px;
+  font-weight: 700; width: 24px; height: 24px;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  border: 2px solid #0a0a0f;
+}
+.cart-item {
+  background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.08);
+  border-radius: 12px; padding: 16px; margin-bottom: 12px; display:flex; 
+  justify-content: space-between; align-items: center; gap: 12px;
+}
+.cart-item-info { flex: 1; }
+.cart-item-title { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+.cart-item-sub { font-size: 12px; color: #94a3b8; }
+.cart-item-price { font-weight: 800; color: #c084fc; font-size: 16px; white-space: nowrap; margin-right: 12px; }
+.cart-item-del {
+  background: rgba(239,68,68,.15); color: #f87171; border:none; border-radius: 8px; 
+  width: 34px; height: 34px; cursor: pointer; display:flex; align-items:center; 
+  justify-content:center; transition:0.2s; flex-shrink: 0;
+}
+.cart-item-del:hover { background: rgba(239,68,68,.3); }
+
+/* ---- OTP ---- */
+.otp-row{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.otp-box{width:50px;height:58px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);border-radius:12px;font-size:24px;font-weight:800;color:#e2e8f0;text-align:center;outline:none;caret-color:#818cf8;transition:border-color .15s;font-family:'Raleway',sans-serif}
+.otp-box:focus{border-color:#818cf8;background:rgba(99,102,241,.07)}
+
+/* ---- Payment & Invoice (Inside Overlay) ---- */
+.pay-layout{display:grid;grid-template-columns:1fr 330px;gap:24px;align-items:start}
+.pay-method{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:15px;padding:14px 18px;cursor:pointer;transition:all .15s;margin-bottom:10px}
+.pay-method:hover{background:rgba(99,102,241,.1);border-color:#818cf8}
+.pay-method.sel{background:rgba(99,102,241,.14);border-color:#818cf8}
+.pay-icon{font-size:26px;flex-shrink:0;width:36px;text-align:center}
+.pay-name{font-weight:700;font-size:14px;margin-bottom:1px}
+.pay-sub{font-size:12px;color:#64748b}
+.pay-check{margin-left:auto;color:#818cf8;font-weight:800;font-size:16px;display:none}
+.pay-method.sel .pay-check{display:block}
+.side-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:22px}
+.side-lbl{font-size:10px;color:#818cf8;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px}
+.side-row{display:flex;justify-content:space-between;gap:8px;margin-bottom:10px}
+.side-k{font-size:13px;color:#64748b}
+.side-v{font-size:13px;font-weight:600;text-align:right}
+.total-row{display:flex;justify-content:space-between;align-items:center;margin:14px 0 20px}
+.total-lbl{font-size:14px;color:#94a3b8;font-weight:500}
+.total-val{font-size:24px;font-weight:800;color:#c084fc}
+.qris-wrap{text-align:center;margin-bottom:16px}
+.qris-inner{background:#fff;border-radius:14px;padding:12px;display:inline-block}
+.va-box{background:rgba(255,255,255,.04);border-radius:11px;padding:12px 16px;margin-bottom:16px}
+.va-lbl{font-size:11px;color:#64748b;margin-bottom:4px}
+.va-num{font-family:monospace;font-size:19px;font-weight:700;letter-spacing:2px}
+.pay-extra{display:none}
+
+.success-head{text-align:center;margin-bottom:30px}
+.success-icon{font-size:60px;margin-bottom:10px}
+.success-title{font-family:'Oswald',sans-serif;font-size:36px;font-weight:700;margin-bottom:6px;letter-spacing:1px;color:#c084fc;}
+.success-sub{font-size:16px;color:#e2e8f0;line-height:1.6;}
+
+/* =========================================
+   POLICY, ABOUT, CONTACT SECTION
+   ========================================= */
+.policy-box {
+  background:rgba(0,0,0,.5); backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,.1); border-radius:20px; 
+  padding:40px; margin: 0 auto; max-width: 800px;
+}
+.policy-list { list-style: none; padding: 0; }
+.policy-list li { margin-bottom: 16px; padding-left: 28px; position: relative; line-height: 1.7; color:#cbd5e1; font-size:15px; }
+.policy-list li::before { content: '✓'; position: absolute; left: 0; top: 0; color: #818cf8; font-weight: bold; font-size: 16px; }
+
+.about-box{background:rgba(255,255,255,.06);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:40px;margin-bottom:24px}
+.about-box h2{font-family:'Oswald',sans-serif;font-size:36px;color:#c084fc;margin-bottom:16px;letter-spacing:1px}
+.about-box p{font-size:15px;line-height:1.9;color:#cbd5e1;margin-bottom:14px}
+.about-box a{color:#818cf8;text-decoration:none}
+.about-box a:hover{text-decoration:underline}
+.about-cta{display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;text-decoration:none;padding:14px 28px;border-radius:12px;font-size:15px;font-weight:700;transition:all .2s}
+.about-cta:hover{opacity:.88;transform:translateY(-2px)}
+
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+.contact-info{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:36px}
+.contact-info h2{font-family:'Oswald',sans-serif;font-size:32px;color:#c084fc;margin-bottom:18px;letter-spacing:1px}
+.contact-info p{font-size:15px;color:#cbd5e1;margin-bottom:18px;line-height:1.8}
+.contact-info a{color:#818cf8;text-decoration:none}
+.contact-info a:hover{text-decoration:underline}
+.map-btn{display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;text-decoration:none;padding:14px 26px;border-radius:12px;font-size:15px;font-weight:700;transition:all .2s;border:none;cursor:pointer;font-family:'Raleway',sans-serif}
+.map-btn:hover{opacity:.88;transform:translateY(-2px)}
+.contact-form-box{background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:36px}
+.contact-form-box input,.contact-form-box textarea{width:100%;background:transparent;border:none;border-bottom:1px solid rgba(196,132,252,.4);color:#e2e8f0;font-size:15px;font-family:'Raleway',sans-serif;padding:12px 0;margin-bottom:20px;outline:none;transition:border-color .2s}
+.contact-form-box input:focus,.contact-form-box textarea:focus{border-color:#818cf8}
+.contact-form-box input::placeholder,.contact-form-box textarea::placeholder{color:#64748b}
+.contact-form-box textarea{resize:vertical;min-height:120px}
+.submit-btn{background:none;border:none;color:#e2e8f0;font-size:15px;font-weight:700;font-family:'Raleway',sans-serif;cursor:pointer;transition:color .2s;float:right;padding:8px 0}
+.submit-btn:hover{color:#c084fc}
+
+footer{border-top:1px solid rgba(255,255,255,.08);padding:24px;text-align:center}
+.footer-inner{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.footer-inner span{font-size:14px;color:#475569}
+.footer-inner a{color:#818cf8;text-decoration:none}
+.footer-inner a:hover{text-decoration:underline}
+
+@media(max-width:768px){
+  .nav-links{display:none;flex-direction:column;position:absolute;top:100%;left:0;width:100%;background:rgba(10,10,15,.98);padding:16px;border-bottom:1px solid rgba(99,102,241,.2)}
+  .nav-links.open{display:flex}
+  .menu-toggle{display:block}
+  .pay-layout{grid-template-columns:1fr}
+  .contact-grid{grid-template-columns:1fr}
+  .intro-logo{font-size:52px}
+  .games-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
+  .otp-box{width:42px;height:52px;font-size:20px}
+  .overlay-inner { padding: 20px; }
+}
+@media(max-width:480px){
+  .pkg-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loading-overlay">
+  <div class="spinner"></div>
+  <div class="loading-text">Memproses Pembayaran...</div>
+</div>
+
+<nav id="tm-nav">
+  <div class="nav-container">
+    <a class="nav-logo" onclick="goHome();scrollToSection('intro')">MobaShop</a>
+    <button class="menu-toggle" id="menu-toggle" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="#intro" onclick="closeMobileMenu()">Awalan</a></li>
+      <li><a href="#menu-section" onclick="closeMobileMenu()">Top Up</a></li>
+      <li><a href="#policy" onclick="closeMobileMenu()">Kebijakan</a></li>
+      <li><a href="#about" onclick="closeMobileMenu()">Tentang</a></li>
+      <li><a href="#contact" onclick="closeMobileMenu()">Kontak</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="cart-fab" onclick="goCart()" title="Keranjang Belanja">
+  🛒
+  <span class="cart-badge" id="cart-badge" style="display:none;">0</span>
+</div>
+
+<div id="intro" class="parallax-window">
+  <div class="intro-inner">
+    <div class="intro-badge">✦ Instant Diamond Delivery</div>
+    <h1 class="intro-logo">MobaShop</h1>
+    <p class="intro-tagline">Top Up Murah, Cepat, Hemat </p>
+    <div class="intro-desc-box">
+      <p>
+        Top up diamond game favoritmu dengan mudah, cepat, dan aman — tersedia Mobile Legends, Free Fire, PUBG Mobile, Xbox, Genshin Impact & lebih banyak lagi.
+        Butuh bantuan? <a href="https://wa.me/628123456789" target="_blank" rel="nofollow">Hubungi kami lewat WhatsApp</a>.
+      </p>
+    </div>
+    <a href="#menu-section" class="intro-cta" onclick="return true">
+      <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+      Top Up Sekarang
+    </a>
+  </div>
+</div>
+
+<div id="menu-section" class="parallax-window">
+  <div class="section-wrap">
+    <div class="section-title-wrap">
+      <h2 class="section-title"><span>Top Up Diamond</span></h2>
+      <p class="section-sub">Pilih game, pilih paket, bayar, selesai — dalam hitungan menit</p>
+    </div>
+
+    <div id="page-home" class="page active">
+      <div class="games-grid" id="games-grid"></div>
+      <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:18px 24px;display:flex;flex-wrap:wrap;gap:20px;align-items:center">
+        <span style="font-size:13px;color:#94a3b8">⚡ Proses Instan</span>
+        <span style="font-size:13px;color:#94a3b8">🔒 Transaksi Aman SSL</span>
+        <span style="font-size:13px;color:#94a3b8">💬 CS 24/7 via WhatsApp</span>
+        <span style="font-size:13px;color:#94a3b8">✅ 100.000+ Pelanggan</span>
+        <span style="font-size:13px;color:#94a3b8">🏆 Terpercaya Sejak 2020</span>
+      </div>
+    </div>
+
+    <div id="page-pkgs" class="page">
+      <div class="bc">
+        <span class="lk" onclick="goHome()">Beranda</span>
+        <span>›</span>
+        <span id="bc-game-name" style="color:#e2e8f0"></span>
+      </div>
+      <div class="game-header-row">
+        <div class="gh-logo" id="pkgs-logo-box"></div>
+        <div>
+          <h3 style="font-family:'Oswald',sans-serif;font-size:22px;font-weight:700;margin-bottom:3px" id="pkgs-title"></h3>
+          <div style="font-size:13px;color:#64748b">Pilih paket yang sesuai kebutuhanmu</div>
+        </div>
+      </div>
+      <div class="divider" style="margin-bottom:24px"></div>
+      <div class="pkg-grid" id="pkg-grid"></div>
+      <div id="pkg-continue" style="display:none">
+        <button class="btn btn-p btn-lg" onclick="goForm()">Lanjutkan Pembelian → &nbsp;<span id="pkg-continue-price"></span></button>
+      </div>
+    </div>
+
+    <div id="page-form" class="page">
+      <div class="bc">
+        <span class="lk" onclick="goHome()">Beranda</span><span>›</span>
+        <span class="lk" id="bc-form-game" onclick="goPkgs()"></span><span>›</span>
+        <span style="color:#e2e8f0">Isi Data</span>
+      </div>
+      <h3 style="font-family:'Oswald',sans-serif;font-size:22px;margin-bottom:22px;letter-spacing:.5px">Isi Data Akun</h3>
+      <div class="summary-card">
+        <div>
+          <div class="sum-title">Ringkasan Pilihan</div>
+          <div class="sum-name" id="form-sum-name"></div>
+          <div class="sum-sub" id="form-sum-sub"></div>
+        </div>
+        <div class="sum-price" id="form-sum-price"></div>
+      </div>
+      <div class="err-box" id="form-err"></div>
+      <div class="form-inner">
+        <div class="inp-group">
+          <label class="lbl">User ID / Server ID Game</label>
+          <input class="inp" type="text" id="inp-uid" placeholder="Contoh: 12345678 (1234)">
+        </div>
+        <div class="inp-hint">Temukan ID di halaman profil akun game kamu</div>
+        
+        <div class="btn-row" style="margin-top:18px">
+          <button class="btn btn-s" onclick="goPkgs()">← Kembali</button>
+          <button class="btn btn-p" onclick="addToCart()">+ Tambah ke Keranjang</button>
+        </div>
+      </div>
+    </div>
+    
+    <div id="page-cart" class="page">
+      <div class="bc">
+        <span class="lk" onclick="goHome()">Beranda</span><span>›</span>
+        <span style="color:#e2e8f0">Keranjang Belanja</span>
+      </div>
+      <h3 style="font-family:'Oswald',sans-serif;font-size:22px;margin-bottom:22px;letter-spacing:.5px">Keranjang Anda</h3>
+      
+      <div id="cart-empty-state" style="display:none; text-align:center; padding: 40px 0;">
+        <div style="font-size:40px; margin-bottom:16px;">🛒</div>
+        <p style="color:#94a3b8; font-size:16px; margin-bottom:20px;">Keranjang belanja kamu masih kosong.</p>
+        <button class="btn btn-p" onclick="goHome()">Mulai Belanja</button>
+      </div>
+      
+      <div id="cart-content-state">
+        <div id="cart-items-container"></div>
+        
+        <div class="summary-card" style="margin-top:24px;">
+           <div>
+             <div class="sum-title">Total Pembayaran</div>
+             <div class="sum-sub" id="cart-total-items">0 Item</div>
+           </div>
+           <div class="sum-price" id="cart-total-price">Rp 0</div>
+        </div>
+        
+        <div class="divider"></div>
+        
+        <div class="form-inner" style="margin-top:20px;">
+          <h4 style="font-size:15px; margin-bottom:12px;">Informasi Kontak Pengiriman</h4>
+           <div class="inp-group">
+              <label class="lbl">Email (untuk kode OTP & Struk Pembelian)</label>
+              <input class="inp" type="email" id="cart-email" placeholder="kamu@email.com">
+           </div>
+           <div class="err-box" id="cart-err"></div>
+           <div class="btn-row" style="margin-top:18px;">
+             <button class="btn btn-s" onclick="goHome()">← Beli Game Lain</button>
+             <button class="btn btn-p" onclick="processCheckout()">Lanjut Pembayaran →</button>
+           </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-otp" class="page">
+      <div class="bc">
+        <span class="lk" onclick="goHome()">Beranda</span><span>›</span>
+        <span class="lk" onclick="goCart()">Keranjang</span><span>›</span>
+        <span style="color:#e2e8f0">Verifikasi OTP</span>
+      </div>
+      <div style="max-width:420px">
+        <h3 style="font-family:'Oswald',sans-serif;font-size:22px;margin-bottom:8px;letter-spacing:.5px">Verifikasi Email</h3>
+        <p style="color:#64748b;font-size:14px;margin-bottom:26px;line-height:1.7">
+          Kode OTP 6 digit telah dikirim ke<br>
+          <strong id="otp-email-display" style="color:#e2e8f0"></strong>
+        </p>
+        <div class="otp-row">
+          <input class="otp-box" id="o0" maxlength="1" inputmode="numeric">
+          <input class="otp-box" id="o1" maxlength="1" inputmode="numeric">
+          <input class="otp-box" id="o2" maxlength="1" inputmode="numeric">
+          <input class="otp-box" id="o3" maxlength="1" inputmode="numeric">
+          <input class="otp-box" id="o4" maxlength="1" inputmode="numeric">
+          <input class="otp-box" id="o5" maxlength="1" inputmode="numeric">
+        </div>
+        <div class="err-box" id="otp-err"></div>
+        <div id="otp-timer-txt" style="font-size:13px;margin-bottom:16px"></div>
+        <div class="info-box">💡 <strong>Mode Demo:</strong> gunakan kode <strong>123456</strong></div>
+        <div class="btn-row">
+          <button class="btn btn-s" onclick="goCart()">← Kembali</button>
+          <button class="btn btn-p" onclick="verifyOtp()">Verifikasi →</button>
+        </div>
+      </div>
+    </div>
+
+  </div></div><div id="policy" class="parallax-window">
+  <div class="section-wrap">
+    <div class="section-title-wrap">
+      <h2 class="section-title"><span>Kebijakan Pembelian</span></h2>
+      <p class="section-sub">Syarat dan ketentuan bertransaksi di MobaShop</p>
+    </div>
+    <div class="policy-box">
+      <ul class="policy-list">
+        <li><strong>Kebenaran Data:</strong> Pastikan User ID dan Server ID (jika ada) yang Anda masukkan sudah benar. Kesalahan input sepenuhnya menjadi tanggung jawab pembeli dan pesanan tidak dapat dibatalkan.</li>
+        <li><strong>Estimasi Proses:</strong> Top up umumnya akan masuk secara otomatis dalam waktu 1-5 menit setelah pembayaran terverifikasi oleh sistem kami. Untuk event tertentu, bisa membutuhkan waktu lebih lama.</li>
+        <li><strong>Kebijakan Pengembalian Dana (Refund):</strong> Tidak ada pengembalian dana (refund) untuk pesanan yang sudah sukses dan diproses ke dalam akun game Anda.</li>
+        <li><strong>Keamanan Transaksi:</strong> Jangan pernah membagikan password atau OTP Anda kepada siapa pun, termasuk pihak yang mengatasnamakan MobaShop. Kami hanya memerlukan ID akun Anda.</li>
+        <li><strong>Kendala Transaksi:</strong> Jika pesanan belum masuk melewati 30 menit, silakan hubungi Customer Service kami via WhatsApp dengan menyertakan bukti pemesanan yang dikirim via email.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div id="about" class="parallax-window">
+  <div class="section-wrap" style="display:flex;align-items:flex-start;justify-content:flex-end">
+    <div style="max-width:520px;width:100%">
+      <div class="about-box">
+        <h2>Tentang MobaShop</h2>
+        <p>
+          MobaShop adalah platform top up diamond game online terpercaya di Indonesia. Kami menyediakan layanan pengisian diamond, UC, VP, Primogem, dan mata uang in-game lainnya dengan proses instan dan harga kompetitif.
+        </p>
+        <p>
+          Dengan lebih dari 100.000 pelanggan aktif dan rating kepuasan 4.9/5, kami berkomitmen memberikan pelayanan terbaik 24/7.
+          Jika ingin mendukung kami, ceritakan MobaShop kepada teman-temanmu!
+          Kunjungi juga <a href="https://www.mobashop.com" target="_blank" rel="nofollow">blog kami</a> untuk informasi terbaru.
+        </p>
+      </div>
+      <a href="#contact" class="about-cta">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Hubungi Kami
+      </a>
+    </div>
+  </div>
+</div>
+
+<div id="contact" class="parallax-window" style="min-height:auto">
+  <div class="section-wrap">
+    <div class="section-title-wrap">
+      <h2 class="section-title"><span>Kontak Kami</span></h2>
+    </div>
+    <div class="contact-grid">
+      <div class="contact-info">
+        <h2>Temukan Kami</h2>
+        <p>📍 JL. Mobashop 3 no 10</p>
+        <p>
+          📞 Tel: <a href="tel:08123456789">08123456789</a><br>
+          ✉️ Email: <a href="mailto:mobashop@cuan.com">mobashop@cuan.com</a>
+        </p>
+        <a href="https://goo.gl/maps/dXViG2rdqh7XozfL6" target="_blank" class="map-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Buka Google Maps
+        </a>
+      </div>
+      <div class="contact-form-box">
+        <form onsubmit="handleContactForm(event)">
+          <input type="text" name="name" placeholder="Nama Kamu" required>
+          <input type="email" name="email" placeholder="Email" required>
+          <textarea name="message" rows="5" placeholder="Pesan..."></textarea>
+          <div style="text-align:right;overflow:hidden">
+            <button type="submit" class="submit-btn">Kirim Pesan →</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <footer>
+    <div class="footer-inner">
+      <span>© 2024 MobaShop. All rights reserved.</span>
+      <span>Design: <a href="https://www.mobashop.com" target="_blank">MobaShop</a></span>
+    </div>
+  </footer>
+</div>
+
+<div id="page-payment" class="page overlay-style">
+  <div class="overlay-inner">
+    <button class="btn btn-s" style="margin-bottom: 24px;" onclick="goPage('cart')">← Batal & Kembali ke Keranjang</button>
+    <h3 style="font-family:'Oswald',sans-serif;font-size:28px;margin-bottom:24px;letter-spacing:.5px;">Pilih Metode Pembayaran</h3>
+    
+    <div class="pay-layout">
+      <div>
+        <div style="font-size:13px;color:#64748b;margin-bottom:12px;font-weight:500">Metode pembayaran tersedia:</div>
+        <div id="methods-list"></div>
+      </div>
+      <div class="side-card">
+        <div class="side-lbl">Ringkasan Pesanan (Keranjang)</div>
+        <div class="side-row"><span class="side-k">Game</span><span class="side-v" id="pay-game"></span></div>
+        <div class="side-row"><span class="side-k">Paket</span><span class="side-v" id="pay-pkg"></span></div>
+        <div class="side-row"><span class="side-k">Total Item</span><span class="side-v" id="pay-total-items"></span></div>
+        <div class="divider"></div>
+        <div class="total-row">
+          <span class="total-lbl">Total Bayar</span>
+          <span class="total-val" id="pay-total"></span>
+        </div>
+        <div id="method-sel-info" style="display:none">
+          <div class="ok-box" id="method-sel-label"></div>
+          
+          <div id="pay-extra-qris" class="pay-extra">
+            <div class="qris-wrap">
+              <div class="qris-inner">
+                <img src="img/qris.jpg" alt="QRIS" style="width: 160px; height: auto; display: block; margin: 0 auto; border-radius: 8px;">
+              </div>
+              <div style="font-size:12px;color:#64748b;margin-top:8px">Scan QR dengan aplikasi pembayaran</div>
+            </div>
+          </div>
+          
+          <div id="pay-extra-va" class="pay-extra">
+            <div class="va-box">
+              <div class="va-lbl">Nomor Virtual Account</div>
+              <div class="va-num" id="va-number"></div>
+            </div>
+          </div>
+          
+          <div id="pay-extra-ewallet" class="pay-extra">
+            <div style="background:rgba(255,255,255,.04);border-radius:11px;padding:12px 16px;margin-bottom:16px">
+              <div style="font-size:11px;color:#64748b;margin-bottom:4px">Kode Transfer</div>
+              <div style="font-family:monospace;font-size:18px;font-weight:700;letter-spacing:2px">08<span id="ewallet-code"></span></div>
+            </div>
+          </div>
+          <button class="btn btn-p btn-full" onclick="confirmPay()">Konfirmasi Pembayaran ✓</button>
+        </div>
+        <div id="method-placeholder" style="font-size:13px;color:#475569;text-align:center;padding:8px 0">← Pilih metode pembayaran</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="page-invoice" class="page overlay-style">
+  <div class="overlay-inner" style="max-width: 540px; text-align: center; padding: 60px 30px;">
+    <div class="success-icon" style="font-size: 80px; margin-bottom: 20px;">🎉</div>
+    <h2 class="success-title">Pembayaran Berhasil!</h2>
+    <p class="success-sub" style="margin-bottom: 30px;">
+      Terima kasih telah berbelanja di MobaShop.<br><br>
+      Detail pesanan dan <strong>Struk Pembelian (Invoice)</strong> telah dikirimkan ke email Anda:<br>
+      <strong id="sent-email-display" style="display:inline-block; margin-top:10px; color: #c084fc; font-size: 18px; padding: 10px 20px; background: rgba(192, 132, 252, 0.1); border-radius: 10px;"></strong>
+    </p>
+    <button class="btn btn-p btn-full" onclick="finishOrder()">🏠 Kembali ke Beranda</button>
+  </div>
+</div>
+
+<script>
+/* ---- DATA ---- */
+const GAMES=[
+  {
+    id:"ml",name:"Mobile Legends",cat:"MOBA",
+    accent:"#e8a020",bg:"linear-gradient(135deg,#2a1400,#1a0d00)",
+    emoji:"⚔️",
+    imgSrc:"img/ML.png" 
+  },
+  {
+    id:"ff",name:"Free Fire",cat:"Battle Royale",
+    accent:"#ff4500",bg:"linear-gradient(135deg,#2a0000,#1a0000)",
+    emoji:"🔥",
+    imgSrc:"img/freefire.jpg" 
+  },
+  {
+    id:"pubg",name:"PUBG Mobile",cat:"Battle Royale",
+    accent:"#f5c518",bg:"linear-gradient(135deg,#1a1500,#0e0c00)",
+    emoji:"🎯",
+    imgSrc:"img/PUBG MOBILE.jpg" 
+  },
+  {
+    id:"xbox",name:"Xbox Gift Card",cat:"Console",
+    accent:"#4caf50",bg:"linear-gradient(135deg,#001500,#001000)",
+    emoji:"🎮",
+    imgSrc:"img/XBOX.jpg" 
+  },
+  {
+    id:"genshin",name:"Genshin Impact",cat:"RPG",
+    accent:"#a78bfa",bg:"linear-gradient(135deg,#0f0020,#0a0015)",
+    emoji:"✨",
+    imgSrc:"img/genshin.jpg" 
+  },
+  {
+    id:"valorant",name:"Valorant",cat:"FPS",
+    accent:"#ff4655",bg:"linear-gradient(135deg,#1e0008,#0d0005)",
+    emoji:"💎",
+    imgSrc:"img/valorant.jpg" 
+  },
+];
+
+const PKGS={
+  ml:[
+    {id:1,label:"5 Diamond",price:1500,bonus:""},
+    {id:2,label:"12 Diamond",price:3500,bonus:""},
+    {id:3,label:"19 Diamond",price:5500,bonus:""},
+    {id:4,label:"50 Diamond",price:13000,bonus:""},
+    {id:5,label:"100 Diamond",price:25000,bonus:"+5 bonus"},
+    {id:6,label:"172 Diamond",price:42000,bonus:"+12 bonus"},
+    {id:7,label:"257 Diamond",price:62000,bonus:"+17 bonus"},
+    {id:8,label:"500 Diamond",price:119000,bonus:"+50 bonus"},
+  ],
+  ff:[
+    {id:1,label:"5 Diamond",price:1200,bonus:""},
+    {id:2,label:"12 Diamond",price:2800,bonus:""},
+    {id:3,label:"50 Diamond",price:11000,bonus:""},
+    {id:4,label:"100 Diamond",price:21000,bonus:"+10 bonus"},
+    {id:5,label:"210 Diamond",price:43000,bonus:"+20 bonus"},
+    {id:6,label:"500 Diamond",price:99000,bonus:"+50 bonus"},
+  ],
+  pubg:[
+    {id:1,label:"5 UC",price:1500,bonus:""},
+    {id:2,label:"20 UC",price:5500,bonus:""},
+    {id:3,label:"60 UC",price:16000,bonus:""},
+    {id:4,label:"130 UC",price:32000,bonus:"+6 bonus"},
+    {id:5,label:"300 UC",price:72000,bonus:"+15 bonus"},
+    {id:6,label:"500 UC",price:118000,bonus:"+25 bonus"},
+  ],
+  xbox:[
+    {id:1,label:"Rp 25.000 Gift Card",price:28000,bonus:""},
+    {id:2,label:"Rp 50.000 Gift Card",price:55000,bonus:""},
+    {id:3,label:"Rp 100.000 Gift Card",price:108000,bonus:""},
+    {id:4,label:"Rp 200.000 Gift Card",price:215000,bonus:""},
+    {id:5,label:"Rp 500.000 Gift Card",price:530000,bonus:""},
+  ],
+  genshin:[
+    {id:1,label:"60 Primogem",price:14000,bonus:""},
+    {id:2,label:"300 Primogem",price:67000,bonus:"+30 bonus"},
+    {id:3,label:"980 Primogem",price:214000,bonus:"+110 bonus"},
+    {id:4,label:"1980 Primogem",price:430000,bonus:"+260 bonus"},
+    {id:5,label:"3280 Primogem",price:712000,bonus:"+600 bonus"},
+    {id:6,label:"6480 Primogem",price:1400000,bonus:"+1600 bonus"},
+  ],
+  valorant:[
+    {id:1,label:"420 VP",price:35000,bonus:""},
+    {id:2,label:"700 VP",price:55000,bonus:""},
+    {id:3,label:"1375 VP",price:105000,bonus:""},
+    {id:4,label:"2050 VP",price:155000,bonus:"+50 bonus"},
+    {id:5,label:"3650 VP",price:270000,bonus:"+150 bonus"},
+    {id:6,label:"5350 VP",price:390000,bonus:"+350 bonus"},
+  ],
+};
+
+const METHODS=[
+  {id:"qris",label:"QRIS",icon:"📱",desc:"Scan & Bayar Langsung",type:"qris"},
+  {id:"dana",label:"DANA",icon:"💙",desc:"E-Wallet",type:"ewallet",code:"53"},
+  {id:"gopay",label:"GoPay",icon:"💚",desc:"E-Wallet",type:"ewallet",code:"69"},
+  {id:"bca",label:"BCA Virtual Account",icon:"🏦",desc:"Virtual Account",type:"va",va:"1234 5678 9012 3456"},
+  {id:"mandiri",label:"Mandiri",icon:"🏛️",desc:"Virtual Account",type:"va",va:"8888 1234 5678 9012"},
+  {id:"bni",label:"BNI",icon:"🏧",desc:"Virtual Account",type:"va",va:"9999 4321 8765 2109"},
+  {id:"bri",label:"BRI Virtual Account",icon:"🏦",desc:"Virtual Account",type:"va",va:"0088 8765 4321 0099"},
+];
+
+/* ---- STATE & CART ---- */
+let state={game:null,pkg:null,email:"",method:null};
+let cart=[]; 
+let otpTimerInt=null,otpSecs=0;
+
+/* ---- UTILS ---- */
+function rp(n){return"Rp "+n.toLocaleString("id-ID")}
+function q(id){return document.getElementById(id)}
+
+/* ---- NAV ---- */
+window.addEventListener("scroll",()=>{
+  q("tm-nav").classList.toggle("scrolled",window.scrollY>60);
+});
+q("menu-toggle").addEventListener("click",()=>{
+  q("nav-links").classList.toggle("open");
+});
+function closeMobileMenu(){q("nav-links").classList.remove("open")}
+function scrollToSection(id){
+  const el=q(id);
+  if(el)setTimeout(()=>el.scrollIntoView({behavior:"smooth"}),80);
+}
+
+/* ---- BUILD HOME ---- */
+(function buildHome(){
+  const grid=q("games-grid");
+  GAMES.forEach(g=>{
+    const d=document.createElement("div");
+    d.className="game-card";
+    d.style.cssText=`background:${g.bg};border-color:${g.accent}25;--accent:${g.accent}`;
+    
+    d.innerHTML=`
+      <div class="gc-top">
+        <div class="gc-glow" style="--accent:${g.accent}"></div>
+        <img class="gc-logo" src="${g.imgSrc}" data-image-src="${g.imgSrc}" alt="${g.name}">
+      </div>
+      <div class="gc-body">
+        <div class="gc-cat" style="color:${g.accent}">${g.cat}</div>
+        <div class="gc-name">${g.name}</div>
+        <div class="gc-from">Mulai dari ${rp(PKGS[g.id][0].price)}</div>
+      </div>
+      <div class="gc-arrow">→</div>`;
+      
+    d.addEventListener("mouseenter",()=>{d.style.borderColor=g.accent+"66"});
+    d.addEventListener("mouseleave",()=>{d.style.borderColor=g.accent+"25"});
+    d.addEventListener("click",()=>selectGame(g.id));
+    grid.appendChild(d);
+  });
+})();
+
+/* ---- PAGE SWITCHING ---- */
+function goPage(name){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  const target = q("page-"+name);
+  target.classList.add("active");
+  
+  // Mencegah halaman belakang discroll ketika overlay page terbuka
+  if(target.classList.contains("overlay-style")){
+    document.body.style.overflow = "hidden";
+  } else {
+    document.body.style.overflow = "";
+    if(name !== "payment" && name !== "invoice"){
+      scrollToSection("menu-section");
+    }
+  }
+}
+
+function goHome(){
+  state={game:null,pkg:null,email:"",method:null};
+  clearInterval(otpTimerInt);
+  goPage("home");
+}
+function goPkgs(){goPage("pkgs")}
+
+/* ---- CART FUNCTIONS ---- */
+function updateCartBadge(){
+  const badge = q("cart-badge");
+  if(cart.length > 0) {
+    badge.style.display = "flex";
+    badge.textContent = cart.length;
+  } else {
+    badge.style.display = "none";
+  }
+}
+
+function addToCart(){
+  const uid = q("inp-uid").value.trim();
+  const err = q("form-err");
+  if(!uid){ err.textContent="⚠ Masukkan User ID / Server ID terlebih dahulu."; err.style.display="block"; return; }
+  
+  cart.push({
+    id: Date.now() + Math.random(),
+    game: state.game,
+    pkg: state.pkg,
+    userId: uid
+  });
+  
+  err.style.display="none";
+  updateCartBadge();
+  alert("✅ Paket berhasil ditambahkan ke keranjang belanja!");
+  goHome();
+}
+
+function goCart(){
+  if(cart.length === 0){
+    q("cart-empty-state").style.display = "block";
+    q("cart-content-state").style.display = "none";
+  } else {
+    q("cart-empty-state").style.display = "none";
+    q("cart-content-state").style.display = "block";
+    
+    const container = q("cart-items-container");
+    container.innerHTML = "";
+    let total = 0;
+    
+    cart.forEach((item, idx) => {
+      total += item.pkg.price;
+      const d = document.createElement("div");
+      d.className = "cart-item";
+      d.innerHTML = `
+        <div class="cart-item-info">
+           <div class="cart-item-title">${item.game.emoji} ${item.game.name} - ${item.pkg.label}</div>
+           <div class="cart-item-sub">ID Akun: ${item.userId} ${item.pkg.bonus ? ' | Bonus: '+item.pkg.bonus : ''}</div>
+        </div>
+        <div class="cart-item-price">${rp(item.pkg.price)}</div>
+        <button class="cart-item-del" onclick="removeFromCart(${idx})" title="Hapus Item">✕</button>
+      `;
+      container.appendChild(d);
+    });
+    
+    q("cart-total-price").textContent = rp(total);
+    q("cart-total-items").textContent = cart.length + " Item";
+  }
+  
+  goPage("cart");
+}
+
+function removeFromCart(index){
+  cart.splice(index, 1);
+  updateCartBadge();
+  goCart(); 
+}
+
+function processCheckout(){
+  if(cart.length === 0) return;
+  const em = q("cart-email").value.trim();
+  const err = q("cart-err");
+  if(!em||!em.includes("@")||!em.includes(".")){
+    err.textContent="⚠ Masukkan alamat email yang valid untuk pengiriman OTP & Struk Pembelian.";
+    err.style.display="block";
+    return;
+  }
+  err.style.display="none";
+  state.email = em;
+  
+  for(let i=0;i<6;i++){const el=q("o"+i);if(el)el.value=""}
+  q("otp-err").style.display="none";
+  q("otp-email-display").textContent=em;
+  startOtpTimer();
+  goPage("otp");
+  setTimeout(()=>{const f=q("o0");if(f)f.focus()},80);
+}
+
+/* ---- SELECT GAME ---- */
+function selectGame(id){
+  state.game=GAMES.find(g=>g.id===id);
+  state.pkg=null;
+  q("bc-game-name").textContent=state.game.name;
+  q("pkgs-title").textContent=state.game.name;
+  
+  const lb=q("pkgs-logo-box");
+  lb.style.background=state.game.bg;
+  lb.innerHTML=`<img src="${state.game.imgSrc}" style="width:100%; height:100%; border-radius:14px; object-fit:cover;" alt="${state.game.name}">`;
+  
+  const grid=q("pkg-grid");
+  grid.innerHTML="";
+  PKGS[id].forEach(p=>{
+    const d=document.createElement("div");
+    d.className="pkg-card";
+    d.id="pkg-"+p.id;
+    d.innerHTML=`
+      <div class="pkg-label">${p.label}</div>
+      <div class="pkg-bonus">${p.bonus||"&nbsp;"}</div>
+      <div class="pkg-price">${rp(p.price)}</div>`;
+    d.addEventListener("click",()=>selectPkg(p));
+    grid.appendChild(d);
+  });
+  q("pkg-continue").style.display="none";
+  goPage("pkgs");
+}
+
+/* ---- SELECT PACKAGE ---- */
+function selectPkg(p){
+  state.pkg=p;
+  document.querySelectorAll(".pkg-card").forEach(c=>{
+    c.classList.remove("sel");
+    c.style.animation = "none";
+  });
+  
+  const el=q("pkg-"+p.id);
+  if(el){
+    el.classList.add("sel");
+    void el.offsetWidth;
+    el.style.animation = "pulseGlow 0.4s ease-out";
+  }
+  
+  q("pkg-continue").style.display="block";
+  q("pkg-continue-price").textContent=rp(p.price);
+}
+
+/* ---- FORM ---- */
+function goForm(){
+  if(!state.pkg)return;
+  const g=state.game,p=state.pkg;
+  q("bc-form-game").textContent=g.name;
+  q("form-sum-name").textContent=g.emoji+" "+g.name;
+  q("form-sum-sub").textContent=p.label+(p.bonus?" ("+p.bonus+")":"");
+  q("form-sum-price").textContent=rp(p.price);
+  q("inp-uid").value="";
+  q("form-err").style.display="none";
+  goPage("form");
+}
+
+/* ---- OTP TIMER ---- */
+function startOtpTimer(){
+  clearInterval(otpTimerInt);
+  otpSecs=60;updateTimerTxt();
+  otpTimerInt=setInterval(()=>{
+    otpSecs=Math.max(0,otpSecs-1);updateTimerTxt();
+    if(otpSecs===0)clearInterval(otpTimerInt);
+  },1000);
+}
+function updateTimerTxt(){
+  const el=q("otp-timer-txt");if(!el)return;
+  el.innerHTML=otpSecs>0
+    ?`<span style="color:#64748b">Kirim ulang kode dalam ${otpSecs} detik</span>`
+    :`<span style="color:#818cf8;cursor:pointer;font-weight:600" onclick="resendOtp()">↺ Kirim ulang kode OTP</span>`;
+}
+function resendOtp(){
+  for(let i=0;i<6;i++){const el=q("o"+i);if(el)el.value=""}
+  q("otp-err").style.display="none";
+  startOtpTimer();
+  setTimeout(()=>{const f=q("o0");if(f)f.focus()},50);
+}
+
+/* ---- OTP INPUT BEHAVIOR ---- */
+(function setupOtp(){
+  for(let i=0;i<6;i++){
+    const el=q("o"+i);
+    el.addEventListener("input",function(){
+      const v=this.value.replace(/\D/g,"").slice(-1);
+      this.value=v;
+      if(v&&i<5){const nx=q("o"+(i+1));if(nx)nx.focus()}
+    });
+    el.addEventListener("keydown",function(e){
+      if(e.key==="Backspace"&&!this.value&&i>0){
+        const pv=q("o"+(i-1));if(pv){pv.value="";pv.focus()}
+      }
+    });
+    el.addEventListener("paste",function(e){
+      e.preventDefault();
+      const txt=(e.clipboardData||window.clipboardData).getData("text").replace(/\D/g,"").slice(0,6);
+      for(let j=0;j<txt.length;j++){const bx=q("o"+j);if(bx)bx.value=txt[j]}
+      const last=q("o"+(Math.min(txt.length,5)));if(last)last.focus();
+    });
+  }
+})();
+
+/* ---- VERIFY OTP ---- */
+function verifyOtp(){
+  let code="";
+  for(let i=0;i<6;i++)code+=(q("o"+i).value||"");
+  const err=q("otp-err");
+  if(code==="123456"){
+    err.style.display="none";
+    buildPayment();
+    goPage("payment");
+  } else {
+    err.textContent="⚠ Kode OTP tidak valid. (Demo: gunakan 123456)";
+    err.style.display="block";
+  }
+}
+
+/* ---- BUILD PAYMENT ---- */
+function buildPayment(){
+  const isMulti = cart.length > 1;
+  const g = cart[0].game;
+  const p = cart[0].pkg;
+  
+  q("pay-game").textContent = isMulti ? "Berbagai Game" : (g.emoji + " " + g.name);
+  q("pay-pkg").textContent = isMulti ? "Berbagai Paket" : p.label;
+  q("pay-total-items").textContent = cart.length + " Pesanan";
+  
+  const total = cart.reduce((sum, item) => sum + item.pkg.price, 0);
+  q("pay-total").textContent = rp(total);
+  
+  state.method=null;
+  q("method-sel-info").style.display="none";
+  q("method-placeholder").style.display="block";
+  document.querySelectorAll(".pay-extra").forEach(e=>e.style.display="none");
+  const list=q("methods-list");
+  list.innerHTML="";
+  METHODS.forEach(m=>{
+    const d=document.createElement("div");
+    d.className="pay-method";
+    d.id="pm-"+m.id;
+    d.innerHTML=`<div class="pay-icon">${m.icon}</div>
+      <div><div class="pay-name">${m.label}</div><div class="pay-sub">${m.desc}</div></div>
+      <div class="pay-check">✓</div>`;
+    d.addEventListener("click",()=>selectMethod(m));
+    list.appendChild(d);
+  });
+}
+
+/* ---- SELECT PAYMENT METHOD ---- */
+function selectMethod(m){
+  state.method=m;
+  document.querySelectorAll(".pay-method").forEach(el=>el.classList.remove("sel"));
+  const sel=q("pm-"+m.id);if(sel)sel.classList.add("sel");
+  q("method-sel-label").textContent="✓ Metode: "+m.label;
+  q("method-sel-info").style.display="block";
+  q("method-placeholder").style.display="none";
+  document.querySelectorAll(".pay-extra").forEach(e=>e.style.display="none");
+  if(m.type==="qris"){q("pay-extra-qris").style.display="block"}
+  else if(m.type==="va"){q("va-number").textContent=m.va;q("pay-extra-va").style.display="block"}
+  else if(m.type==="ewallet"){q("ewallet-code").textContent=m.code+"xxxxxxxx";q("pay-extra-ewallet").style.display="block"}
+}
+
+/* ---- CONFIRM PAYMENT ---- */
+function confirmPay(){
+  if(!state.method) return;
+  
+  const overlay = q("loading-overlay");
+  overlay.classList.add("show");
+  
+  // Proses loading & putar suara terima kasih
+  setTimeout(() => {
+    overlay.classList.remove("show");
+    
+    // Putar Audio Terima Kasih
+    try {
+      const audio = new Audio('img/thankyou.mp3');
+      audio.play().catch(e => console.log("Audio failed to auto-play due to browser policy:", e));
+    } catch(err) {
+      console.log("Audio file not found or unsupported.");
+    }
+    
+    // Tampilkan email pada struk email dan ganti halaman ke invoice
+    q("sent-email-display").textContent = state.email;
+    goPage("invoice");
+  }, 2000);
+}
+
+function finishOrder(){
+  cart = []; 
+  updateCartBadge();
+  goHome();
+  scrollToSection('menu-section');
+}
+
+/* ---- CONTACT FORM ---- */
+function handleContactForm(e){
+  e.preventDefault();
+  const btn=e.target.querySelector(".submit-btn");
+  btn.textContent="Terkirim ✓";
+  btn.style.color="#4ade80";
+  setTimeout(()=>{btn.textContent="Kirim Pesan →";btn.style.color="";e.target.reset()},3000);
+}
+</script>
+</body>
+</html>
