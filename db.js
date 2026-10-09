@@ -4,7 +4,7 @@
    ========================================================= */
 
 /* >>> ISI DUA NILAI INI <<< */
-const SUPABASE_URL = "https://vtqjokqpnmnxhsoetkes.supabase.co";        
+const SUPABASE_URL = "https://vtgjokqpnmnxhsoetkes.supabase.co";        
 const SUPABASE_KEY = "sb_publishable_0rAIHwXF3Fs91oivH2G7mw_2desVOZw";
 
 /* ---- Helper ---- */
