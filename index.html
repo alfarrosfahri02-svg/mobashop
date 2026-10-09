@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MobaShop - Top Up Game</title>
-<link rel="icon" href="img/akhir.png" type="image/png">
+<link rel="icon" href="akhir.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700;800&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
@@ -71,7 +71,7 @@ body{font-family:'Raleway',sans-serif;background:#0a0a0f;color:#e2e8f0;overflow-
   position: fixed;
   top: 0; left: 0; width: 100%; height: 100vh;
   background: rgba(10, 10, 15, 0.98);
-  z-index: 2500; /* Di atas segalanya termasuk navbar */
+  z-index: 2500;
   overflow-y: auto;
   padding: 60px 24px;
   backdrop-filter: blur(10px);
@@ -92,11 +92,11 @@ body{font-family:'Raleway',sans-serif;background:#0a0a0f;color:#e2e8f0;overflow-
   min-height:100vh; background-attachment:fixed; background-size:cover;
   background-position:center; position:relative;
 }
-#intro{background-image:linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.55)),url('img/homepage.png')}
-#menu-section{background-image:linear-gradient(rgba(10,10,15,.82),rgba(10,10,15,.82)),url('img/homee.gif')}
-#policy{background-image:linear-gradient(rgba(10,10,15,.9),rgba(10,10,15,.9)),url('img/policy.png')}
-#about{background-image:linear-gradient(rgba(10,10,15,.75),rgba(10,10,15,.75)),url('img/about.png')}
-#contact{background-image:linear-gradient(rgba(10,10,15,.80),rgba(10,10,15,.80)),url('img/akhir.png')}
+#intro{background-image:linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.55)),url('homepage.png')}
+#menu-section{background-image:linear-gradient(rgba(10,10,15,.82),rgba(10,10,15,.82)),url('homee.gif')}
+#policy{background-image:linear-gradient(rgba(10,10,15,.9),rgba(10,10,15,.9)),url('policy.png')}
+#about{background-image:linear-gradient(rgba(10,10,15,.75),rgba(10,10,15,.75)),url('about.png')}
+#contact{background-image:linear-gradient(rgba(10,10,15,.80),rgba(10,10,15,.80)),url('akhir.png')}
 
 /* =========================================
    NAVIGATION
@@ -626,7 +626,7 @@ footer{border-top:1px solid rgba(255,255,255,.08);padding:24px;text-align:center
           <div id="pay-extra-qris" class="pay-extra">
             <div class="qris-wrap">
               <div class="qris-inner">
-                <img src="img/qris.jpg" alt="QRIS" style="width: 160px; height: auto; display: block; margin: 0 auto; border-radius: 8px;">
+                <img src="qris.jpg" alt="QRIS" style="width: 160px; height: auto; display: block; margin: 0 auto; border-radius: 8px;">
               </div>
               <div style="font-size:12px;color:#64748b;margin-top:8px">Scan QR dengan aplikasi pembayaran</div>
             </div>
@@ -673,7 +673,7 @@ const GAMES=[
     id:"ml",name:"Mobile Legends",cat:"MOBA",
     accent:"#e8a020",bg:"linear-gradient(135deg,#2a1400,#1a0d00)",
     emoji:"⚔️",
-    imgSrc:"img/ML.png" 
+    imgSrc:"ML.png" 
   },
   {
     id:"ff",name:"Free Fire",cat:"Battle Royale",
@@ -685,25 +685,25 @@ const GAMES=[
     id:"pubg",name:"PUBG Mobile",cat:"Battle Royale",
     accent:"#f5c518",bg:"linear-gradient(135deg,#1a1500,#0e0c00)",
     emoji:"🎯",
-    imgSrc:"img/PUBG MOBILE.jpg" 
+    imgSrc:"PUBG MOBILE.jpg" 
   },
   {
     id:"xbox",name:"Xbox Gift Card",cat:"Console",
     accent:"#4caf50",bg:"linear-gradient(135deg,#001500,#001000)",
     emoji:"🎮",
-    imgSrc:"img/XBOX.jpg" 
+    imgSrc:"XBOX.jpg" 
   },
   {
     id:"genshin",name:"Genshin Impact",cat:"RPG",
     accent:"#a78bfa",bg:"linear-gradient(135deg,#0f0020,#0a0015)",
     emoji:"✨",
-    imgSrc:"img/genshin.jpg" 
+    imgSrc:"genshin.jpg" 
   },
   {
     id:"valorant",name:"Valorant",cat:"FPS",
     accent:"#ff4655",bg:"linear-gradient(135deg,#1e0008,#0d0005)",
     emoji:"💎",
-    imgSrc:"img/valorant.jpg" 
+    imgSrc:"valorant.jpg" 
   },
 ];
 
@@ -824,7 +824,6 @@ function goPage(name){
   const target = q("page-"+name);
   target.classList.add("active");
   
-  // Mencegah halaman belakang discroll ketika overlay page terbuka
   if(target.classList.contains("overlay-style")){
     document.body.style.overflow = "hidden";
   } else {
@@ -1103,19 +1102,16 @@ function confirmPay(){
   const overlay = q("loading-overlay");
   overlay.classList.add("show");
   
-  // Proses loading & putar suara terima kasih
   setTimeout(() => {
     overlay.classList.remove("show");
     
-    // Putar Audio Terima Kasih
     try {
-      const audio = new Audio('img/thankyou.mp3');
+      const audio = new Audio('thankyou.mp3');
       audio.play().catch(e => console.log("Audio failed to auto-play due to browser policy:", e));
     } catch(err) {
       console.log("Audio file not found or unsupported.");
     }
     
-    // Tampilkan email pada struk email dan ganti halaman ke invoice
     q("sent-email-display").textContent = state.email;
     goPage("invoice");
   }, 2000);
